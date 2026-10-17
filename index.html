@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conversión de unidades con fracciones equivalentes · 3.º y 4.º ESO</title>
+<meta name="description" content="Practica la conversión de unidades con el método de los factores de conversión (fracciones equivalentes a 1). Física y Química · Matemáticas · 3.º y 4.º de ESO.">
+
+<!-- ===== PWA · rutas SIEMPRE relativas: la app vive en /fraccionesequivalentes/ y no toca la raíz del portal ===== -->
+<meta name="theme-color" content="#1e3a8a">
+<meta name="application-name" content="Fracciones equivalentes">
+<meta name="apple-mobile-web-app-title" content="Fracciones eq.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<style>
+  *{box-sizing:border-box}
+  :root{
+    --bg:#eef3fa; --card:#ffffff; --ink:#16233a; --muted:#5f7086;
+    --accent:#2563eb; --accent-soft:#e6efff;
+    --ok:#15803d; --ok-soft:#e6f6ec;
+    --bad:#b91c1c; --bad-soft:#fdecec;
+    --line:#d8e2f0;
+  }
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;-webkit-text-size-adjust:100%}
+  .hero{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0ea5e9 100%);color:#fff;
+    padding:2.2rem 1.2rem 3rem;text-align:center}
+  .hero h1{margin:0 0 .4rem;font-size:clamp(1.3rem,3.6vw,2.05rem);letter-spacing:-.01em}
+  .hero p{margin:0;opacity:.92;font-size:.95rem}
+  .chip-version{display:inline-block;vertical-align:.4em;font-size:.6rem;font-weight:700;
+    letter-spacing:.06em;font-variant-numeric:tabular-nums;color:#fff;
+    background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.5);
+    border-radius:999px;padding:.22em .65em;margin-left:.45em;white-space:nowrap}
+  .chip-version[hidden]{display:none}
+  main{max-width:980px;margin:-1.8rem auto 3rem;padding:0 1rem;display:grid;gap:1.15rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:1.3rem 1.35rem 1.5rem;box-shadow:0 10px 30px rgba(22,35,58,.08)}
+  .card h2{margin:.1rem 0 1rem;font-size:1.15rem;letter-spacing:-.01em}
+  .card h3{margin:1.2rem 0 .5rem;font-size:1rem;color:#243b60}
+  p{margin:.5rem 0}
+
+  .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+    margin:0 .18em;font-size:.97em;line-height:1.2;white-space:nowrap}
+  .frac .fnum{border-bottom:2px solid currentColor;padding:0 .3em}
+  .frac .fden{padding:0 .3em}
+  .expr{background:var(--accent-soft);border-radius:10px;padding:.7rem 1rem;
+    font-size:1.04rem;line-height:3;overflow-x:auto;margin:.6rem 0}
+  s{color:#9aa8bb;text-decoration-color:#e11d48;text-decoration-thickness:2px}
+
+  .destacado{background:#fff8e6;border-left:5px solid #f59e0b;border-radius:10px;padding:.8rem 1rem;margin:.9rem 0}
+  .nota{color:var(--muted);font-size:.9rem;margin:.35rem 0}
+  .resultado{background:var(--ok-soft);border-left:5px solid var(--ok);border-radius:10px;
+    padding:.6rem .9rem;font-size:1.05rem}
+
+  ol.pasos{margin:0;padding-left:1.15rem}
+  ol.pasos>li{margin-bottom:1rem}
+  .etq{display:inline-block;font-weight:700;font-size:.82rem;text-transform:uppercase;
+    letter-spacing:.04em;color:var(--accent);margin-bottom:.15rem}
+  .pasos p{margin:.2rem 0}
+
+  .filtros{display:flex;flex-wrap:wrap;gap:.9rem;margin-bottom:1rem}
+  label.f{display:flex;flex-direction:column;gap:.25rem;font-size:.85rem;color:var(--muted);font-weight:600}
+  select,input[type=text]{font:inherit;padding:.5rem .65rem;border:1.5px solid var(--line);
+    border-radius:10px;background:#fff;color:var(--ink);min-width:150px}
+  select:focus,input[type=text]:focus{outline:2px solid #bfdbfe;border-color:var(--accent)}
+  button{font:inherit;font-weight:650;border:none;border-radius:10px;padding:.55rem 1rem;
+    background:var(--accent);color:#fff;cursor:pointer;transition:transform .08s,filter .15s}
+  button:hover{filter:brightness(1.08)}
+  button:active{transform:translateY(1px)}
+  button.sec{background:#e8eefb;color:#1d4ed8}
+
+  .enunciado{font-size:1.12rem;background:#f7faff;border:1px dashed #c7d8f5;
+    border-radius:12px;padding:.85rem 1rem;margin:0 0 .9rem}
+  .fila-resp{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem;margin-bottom:.6rem}
+  .ud{font-weight:700;color:#b45309;min-width:44px}
+  .fb{margin-top:.5rem;padding:.6rem .85rem;border-radius:10px;font-size:.95rem}
+  .fb.ok{background:var(--ok-soft);color:var(--ok);border-left:5px solid var(--ok)}
+  .fb.bad{background:var(--bad-soft);color:var(--bad);border-left:5px solid var(--bad)}
+
+  details{margin-top:1rem;border:1.5px solid var(--line);border-radius:12px;
+    background:#fbfdff;overflow:hidden}
+  details>summary{cursor:pointer;padding:.75rem 1rem;font-weight:700;color:#1d4ed8;
+    list-style:none;user-select:none;display:flex;align-items:center;gap:.5rem}
+  details>summary::-webkit-details-marker{display:none}
+  details>summary::before{content:"▸";font-size:1rem;transition:transform .18s;display:inline-block}
+  details[open]>summary::before{transform:rotate(90deg)}
+  details>summary:hover{background:#eef4ff}
+  details .cuerpo{padding:.2rem 1rem 1.1rem;border-top:1px solid var(--line)}
+
+  .bateria-grid{display:grid;gap:1rem;margin-top:1rem}
+  .item{border:1.5px solid var(--line);border-radius:14px;padding:1rem;background:#fdfefe}
+  .item-head{display:flex;gap:.6rem;align-items:flex-start;margin-bottom:.65rem}
+  .item-head .num{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--accent);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700}
+  .item-head .enun{font-size:1.02rem}
+  .item-body{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
+  .item-body input{width:140px;min-width:0}
+  .btn-mini{padding:.45rem .8rem;font-size:.9rem}
+  .fb-mini{margin-top:.5rem;font-size:.92rem;padding:.45rem .7rem;border-radius:8px}
+  .fb-mini.ok{background:var(--ok-soft);color:var(--ok)}
+  .fb-mini.bad{background:var(--bad-soft);color:var(--bad)}
+  .acc-mini{margin-top:.6rem;background:#fff}
+  .acc-mini>summary{font-size:.9rem;padding:.55rem .8rem}
+  .acc-mini .cuerpo{padding:.4rem .9rem 1rem}
+  .acc-mini ol.pasos>li{margin-bottom:.75rem}
+  .acc-mini .etq{font-size:.74rem}
+  .acc-mini .expr{font-size:.95rem;line-height:2.7}
+
+  footer{text-align:center;color:var(--muted);font-size:.85rem;padding:0 1rem 2.5rem}
+  @media (max-width:560px){
+    .card{padding:1.05rem 1rem 1.25rem;border-radius:14px}
+    .expr{font-size:.98rem;line-height:2.7}
+    .enunciado{font-size:1.02rem}
+    .item-body input{width:110px}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Conversión de unidades con fracciones equivalentes
+    <span class="chip-version" id="chipVersion" hidden
+          title="Versión de la aplicación (la facilita el service worker)">…</span></h1>
+  <p>Física y Química · Matemáticas · 3.º y 4.º de ESO</p>
+</header>
+
+<main>
+
+  <!-- ================= TEORÍA ================= -->
+  <section class="card">
+    <h2>🧠 El método, en 4 pasos</h2>
+    <p>Convertir una unidad es cambiar <b>cómo escribimos</b> una medida sin cambiar <b>lo que vale</b>. La herramienta es una idea muy simple:</p>
+
+    <div class="destacado">
+      Multiplicar por <b>1</b> no cambia nada. Y una fracción en la que el numerador y el denominador son <b>la misma cantidad escrita de dos formas distintas</b> vale exactamente <b>1</b>.
+    </div>
+
+    <p>Como <b>1 km = 1000 m</b>, esas dos cantidades son iguales, así que:</p>
+    <p class="expr">
+      <span class="frac"><span class="fnum">1000 m</span><span class="fden">1 km</span></span> = 1
+      &nbsp;&nbsp;y&nbsp;&nbsp;
+      <span class="frac"><span class="fnum">1 km</span><span class="fden">1000 m</span></span> = 1
+    </p>
+    <p>Esa fracción se llama <b>factor de conversión</b>. Si multiplicamos una medida por ella, la unidad antigua se cancela (aparece arriba y abajo) y aparece la nueva.</p>
+
+    <h3>Los 4 pasos</h3>
+    <ol class="pasos">
+      <li><b>Escribe la relación</b> entre las unidades que aparecen (por ejemplo, 1 km = 1000 m).</li>
+      <li><b>Construye la fracción equivalente a 1</b> colocando la unidad que quieres eliminar <i>en el lado contrario</i>: si está arriba, la pones abajo.</li>
+      <li><b>Multiplica</b> la medida por esa fracción (por tantas fracciones como unidades haya que cambiar).</li>
+      <li><b>Cancela las unidades</b> y opera los números.</li>
+    </ol>
+
+    <h3>Ejemplo simple: 25 m → km</h3>
+    <p class="expr">
+      25 <s>m</s> ×
+      <span class="frac"><span class="fnum">1 km</span><span class="fden">1000 <s>m</s></span></span>
+      =
+      <span class="frac"><span class="fnum">25</span><span class="fden">1000</span></span> km
+      = 0,025 km
+    </p>
+
+    <h3>Ejemplo compuesto: 72 km/h → m/s</h3>
+    <p>Ahora hay <b>dos</b> unidades que cambiar, así que usamos <b>dos</b> fracciones (una para el numerador y otra para el denominador):</p>
+    <p class="expr">
+      72 <s>km</s>/<s>h</s> ×
+      <span class="frac"><span class="fnum">1000 m</span><span class="fden">1 <s>km</s></span></span> ×
+      <span class="frac"><span class="fnum">1 <s>h</s></span><span class="fden">3600 s</span></span>
+      =
+      <span class="frac"><span class="fnum">72 × 1000</span><span class="fden">3600</span></span> m/s
+      = 20 m/s
+    </p>
+    <p class="nota">Fíjate: en la segunda fracción la hora va <b>arriba</b> porque en «km/h» la hora está <b>abajo</b>. Siempre colocamos la unidad que queremos eliminar en el lado opuesto.</p>
+  </section>
+
+  <!-- ================= PRÁCTICA ================= -->
+  <section class="card">
+    <h2>🎯 Practica paso a paso</h2>
+
+    <div class="filtros">
+      <label class="f">Tipo de conversión
+        <select id="filtroTipo">
+          <option value="todas">Todas</option>
+          <option value="simple">Simples</option>
+          <option value="compuesta">Compuestas</option>
+        </select>
+      </label>
+      <label class="f">Magnitud
+        <select id="filtroMag"><option value="todas">Todas</option></select>
+      </label>
+    </div>
+
+    <p class="enunciado" id="enunciado">Cargando…</p>
+
+    <div class="fila-resp">
+      <input type="text" id="respuesta" placeholder="Escribe el número" autocomplete="off" inputmode="decimal">
+      <span class="ud" id="unidadDestino"></span>
+      <button id="btnComprobar">Comprobar</button>
+      <button id="btnNuevo" class="sec">🔄 Otro ejercicio</button>
+    </div>
+    <p class="nota">Puedes escribir con coma o con punto. Si el resultado no es exacto, redondea a 3 cifras significativas (tolerancia del 1 %).</p>
+
+    <div id="feedback"></div>
+
+    <details id="acordeon">
+      <summary>💡 Ver cómo se resuelve paso a paso</summary>
+      <div class="cuerpo" id="solucion"></div>
+    </details>
+  </section>
+
+  <!-- ================= BATERÍA ================= -->
+  <section class="card">
+    <h2>🧪 Batería aleatoria de ejercicios</h2>
+    <p class="nota">Ocho ejercicios mezclando magnitudes y tipos de conversión. Corrige cada uno y, si te atascas, abre su solución.</p>
+    <button id="btnBateria">🎲 Generar 8 ejercicios nuevos</button>
+    <div class="bateria-grid" id="bateria"></div>
+  </section>
+
+</main>
+
+<footer>Hecho para practicar el método de los factores de conversión · 3.º y 4.º de ESO</footer>
+
+<script>
+/* =========================================================
+   1. DATOS: magnitudes, unidades y factores
+   ========================================================= */
+
+const MAGNITUDES = {
+  longitud: {
+    nombre: 'Longitud',
+    unidades: { km:1000, hm:100, dam:10, m:1, dm:0.1, cm:0.01, mm:0.001 }
+  },
+  masa: {
+    nombre: 'Masa',
+    unidades: { t:1e6, kg:1000, hg:100, dag:10, g:1, dg:0.1, cg:0.01, mg:0.001 }
+  },
+  tiempo: {
+    nombre: 'Tiempo',
+    unidades: { h:3600, min:60, s:1 }
+  },
+  superficie: {
+    nombre: 'Superficie',
+    unidades: { 'km²':1e6, 'hm²':1e4, 'dam²':100, 'm²':1, 'dm²':0.01, 'cm²':1e-4, 'mm²':1e-6 }
+  },
+  volumen: {
+    nombre: 'Volumen y capacidad',
+    unidades: { 'm³':1, hL:0.1, 'dm³':0.001, L:0.001, cL:1e-5, 'cm³':1e-6, mL:1e-6 }
+  }
+};
+
+const COMPUESTAS = {
+  velocidad: {
+    nombre: 'Velocidad',
+    pares: [['m','s'],['km','h'],['cm','s'],['km','min'],['m','min'],['km','s'],['m','h'],['cm','min']]
+  },
+  densidad: {
+    nombre: 'Densidad',
+    pares: [['g','cm³'],['kg','m³'],['g','L'],['mg','cm³'],['kg','L']]
+  },
+  caudal: {
+    nombre: 'Caudal',
+    pares: [['L','s'],['L','min'],['L','h'],['m³','h'],['m³','s'],['mL','s']]
+  }
+};
+
+/* Índice global: unidad -> factor respecto a la unidad base de su magnitud */
+const FACTOR = {};
+for (const mag of Object.values(MAGNITUDES)) {
+  for (const [u, f] of Object.entries(mag.unidades)) FACTOR[u] = f;
+}
+
+const VALORES = [
+  0.05,0.1,0.2,0.25,0.5,0.75,1,1.5,2,2.5,3,4,5,6,7.5,8,10,12,15,20,24,25,30,36,40,45,50,
+  60,72,75,80,90,100,120,150,200,250,300,360,400,500,600,750,800,900,1000,1200,1500,
+  2000,2500,3000,3600,5000,7500,10000,12000,15000,20000,25000,50000,100000
+];
+
+/* =========================================================
+   2. UTILIDADES
+   ========================================================= */
+
+const $ = sel => document.querySelector(sel);
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+function sup(e){
+  const map = {'-':'⁻','+':'','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴',
+               '5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+  return String(e).split('').map(c => map[c] ?? c).join('');
+}
+
+/* Formatea un número al estilo español */
+function num(n){
+  if (typeof n !== 'number' || !isFinite(n)) return '—';
+  if (n === 0) return '0';
+  const abs = Math.abs(n);
+  if (abs < 1e-4 || abs >= 1e7){
+    const [m, e] = n.toExponential(3).split('e');
+    return m.replace('.', ',') + '·10' + sup(parseInt(e, 10));
+  }
+  const r = Number(n.toPrecision(6));
+  return r.toLocaleString('es-ES', { maximumFractionDigits: 8 });
+}
+
+/* Fracción HTML a partir de dos cadenas ya formateadas */
+function fracHTML(numStr, denStr){
+  return '<span class="frac"><span class="fnum">' + numStr +
+         '</span><span class="fden">' + denStr + '</span></span>';
+}
+
+/* Fracción de conversión: cancela `uo` e introduce `ud`.
+   Devuelve {num:{coef,unit}, den:{coef,unit}} con den.unit === uo */
+function conversionFraction(uo, ud){
+  const fo = FACTOR[uo], fd = FACTOR[ud];
+  if (fo > fd){
+    const k = fo / fd;
+    return { num:{ coef:k, unit:ud }, den:{ coef:1, unit:uo } };
+  } else {
+    const k = fd / fo;
+    return { num:{ coef:1, unit:ud }, den:{ coef:k, unit:uo } };
+  }
+}
+
+function invertir(f){ return { num:f.den, den:f.num }; }
+
+/* Elige un valor de VALORES que dé un resultado "razonable" */
+function valorAdecuado(ratio){
+  const validos = VALORES.filter(v => {
+    const r = v * ratio;
+    return r >= 1e-4 && r <= 1e6;
+  });
+  return validos.length ? pick(validos) : null;
+}
+
+/* Texto de la relación entre dos unidades: "1 mayor = k menor" */
+function relacionTexto(uo, ud){
+  const fo = FACTOR[uo], fd = FACTOR[ud];
+  if (fo > fd) return '1 ' + uo + ' = ' + num(fo / fd) + ' ' + ud;
+  return '1 ' + ud + ' = ' + num(fd / fo) + ' ' + uo;
+}
+
+/* =========================================================
+   3. GENERADORES DE EJERCICIOS
+   ========================================================= */
+
+function magnitudesDisponibles(tipoFiltro){
+  const simples = Object.keys(MAGNITUDES).map(k => ({ key:k, tipo:'simple' }));
+  const comps   = Object.keys(COMPUESTAS).map(k => ({ key:k, tipo:'compuesta' }));
+  if (tipoFiltro === 'simple')    return simples;
+  if (tipoFiltro === 'compuesta') return comps;
+  return simples.concat(comps);
+}
+
+function nombreMagnitud(m){
+  return m.tipo === 'simple' ? MAGNITUDES[m.key].nombre : COMPUESTAS[m.key].nombre;
+}
+
+/* ---------- SIMPLE ---------- */
+function generarSimple(magKey){
+  const mag = MAGNITUDES[magKey];
+  const units = Object.keys(mag.unidades);
+
+  for (let i = 0; i < 600; i++){
+    const origen  = pick(units);
+    const destino = pick(units);
+    if (origen === destino) continue;
+    const fo = mag.unidades[origen], fd = mag.unidades[destino];
+    if (fo === fd) continue;
+    const ratio = fo / fd;
+    const valor = valorAdecuado(ratio);
+    if (valor === null) continue;
+
+    return {
+      tipo: 'simple',
+      magnitud: magKey,
+      etiqueta: mag.nombre,
+      origen, destino, valor,
+      resultado: valor * ratio,
+      f: conversionFraction(origen, destino),
+      rel: relacionTexto(origen, destino)
+    };
+  }
+
+  /* Fallback (prácticamente imposible) */
+  const origen = units[0], destino = units[units.length - 1];
+  const ratio = mag.unidades[origen] / mag.unidades[destino];
+  return {
+    tipo: 'simple', magnitud: magKey, etiqueta: mag.nombre,
+    origen, destino, valor: 1, resultado: ratio,
+    f: conversionFraction(origen, destino),
+    rel: relacionTexto(origen, destino)
+  };
+}
+
+/* ---------- COMPUESTA ---------- */
+function generarCompuesta(clave){
+  const comp = COMPUESTAS[clave];
+
+  for (let i = 0; i < 600; i++){
+    const parO = pick(comp.pares);
+    const parD = pick(comp.pares);
+    if (parO[0] === parD[0] && parO[1] === parD[1]) continue;
+
+    const fo1 = FACTOR[parO[0]], fo2 = FACTOR[parO[1]];
+    const fd1 = FACTOR[parD[0]], fd2 = FACTOR[parD[1]];
+    const ratio = (fo1 / fo2) / (fd1 / fd2);
+    const valor = valorAdecuado(ratio);
+    if (valor === null) continue;
+
+    /* Conversiones necesarias (solo las que cambian de unidad) */
+    const convs = [];
+    if (parO[0] !== parD[0]){
+      convs.push({
+        pos: 'num', de: parO[0], a: parD[0],
+        f: conversionFraction(parO[0], parD[0])
+      });
+    }
+    if (parO[1] !== parD[1]){
+      convs.push({
+        pos: 'den', de: parO[1], a: parD[1],
+        f: invertir(conversionFraction(parO[1], parD[1]))
+      });
+    }
+
+    return {
+      tipo: 'compuesta',
+      magnitud: clave,
+      etiqueta: comp.nombre,
+      valor,
+      parO, parD, convs,
+      resultado: valor * ratio
+    };
+  }
+
+  /* Fallback */
+  const parO = comp.pares[0], parD = comp.pares[1];
+  const ratio = (FACTOR[parO[0]] / FACTOR[parO[1]]) / (FACTOR[parD[0]] / FACTOR[parD[1]]);
+  const convs = [];
+  if (parO[0] !== parD[0]) convs.push({ pos:'num', de:parO[0], a:parD[0], f: conversionFraction(parO[0], parD[0]) });
+  if (parO[1] !== parD[1]) convs.push({ pos:'den', de:parO[1], a:parD[1], f: invertir(conversionFraction(parO[1], parD[1])) });
+  return { tipo:'compuesta', magnitud:clave, etiqueta:comp.nombre, valor:1, parO, parD, convs, resultado: ratio };
+}
+
+/* =========================================================
+   4. ENUNCIADOS Y SOLUCIONES
+   ========================================================= */
+
+function enunciadoHTML(ej){
+  if (ej.tipo === 'simple'){
+    return 'Convierte <b>' + num(ej.valor) + ' ' + ej.origen + '</b> a <b>' + ej.destino + '</b>.';
+  }
+  return 'Convierte <b>' + num(ej.valor) + ' ' + ej.parO[0] + '/' + ej.parO[1] +
+         '</b> a <b>' + ej.parD[0] + '/' + ej.parD[1] + '</b>.';
+}
+
+function unidadDestino(ej){
+  return ej.tipo === 'simple' ? ej.destino : (ej.parD[0] + '/' + ej.parD[1]);
+}
+
+/* ---------- Solución: SIMPLE ---------- */
+function solucionSimple(ej){
+  const f = ej.f;
+  const nN = num(f.num.coef), nD = num(f.den.coef);
+  const fracLimpia  = fracHTML(nN + ' ' + f.num.unit, nD + ' ' + f.den.unit);
+  const fracCancela = fracHTML(nN + ' ' + f.num.unit, nD + ' <s>' + f.den.unit + '</s>');
+  const fracNum     = fracHTML(nN, nD);
+
+  return '<ol class="pasos">' +
+    '<li><span class="etq">Paso 1 · La relación entre las unidades</span>' +
+      '<p>' + ej.rel + '</p>' +
+      '<p class="nota">Las dos cantidades son iguales, así que su cociente vale 1.</p></li>' +
+
+    '<li><span class="etq">Paso 2 · Construimos la fracción equivalente a 1</span>' +
+      '<p>Queremos eliminar los <b>' + ej.origen + '</b>. Como están multiplicando (arriba), los colocamos abajo:</p>' +
+      '<p class="expr">' + fracLimpia + ' = 1</p></li>' +
+
+    '<li><span class="etq">Paso 3 · Multiplicamos la medida por esa fracción</span>' +
+      '<p class="expr">' + num(ej.valor) + ' <b>' + ej.origen + '</b> × ' + fracCancela + '</p></li>' +
+
+    '<li><span class="etq">Paso 4 · Cancelamos las unidades y operamos</span>' +
+      '<p class="expr">' + num(ej.valor) + ' × ' + fracNum + ' ' + ej.destino +
+        ' = ' + num(ej.resultado) + ' ' + ej.destino + '</p>' +
+      '<p class="resultado">' + num(ej.valor) + ' ' + ej.origen + ' = <b>' +
+        num(ej.resultado) + ' ' + ej.destino + '</b></p></li>' +
+  '</ol>';
+}
+
+/* ---------- Solución: COMPUESTA ---------- */
+function solucionCompuesta(ej){
+  const ud = ej.parD[0] + '/' + ej.parD[1];
+
+  /* Paso 1: relaciones */
+  let rels = '';
+  ej.convs.forEach(c => {
+    rels += '<p>' + relacionTexto(c.de, c.a) + '</p>';
+  });
+
+  /* Paso 2: fracciones */
+  let fracs = '';
+  ej.convs.forEach(c => {
+    const nN = num(c.f.num.coef), nD = num(c.f.den.coef);
+    const posTxt = c.pos === 'num' ? 'arriba' : 'abajo';
+    const ladoTxt = c.pos === 'num' ? 'abajo' : 'arriba';
+    fracs += '<p>Queremos eliminar <b>' + c.de + '</b>, que está ' + posTxt +
+             ', así que lo colocamos ' + ladoTxt + ':</p>' +
+             '<p class="expr">' + fracHTML(nN + ' ' + c.f.num.unit, nD + ' ' + c.f.den.unit) + ' = 1</p>';
+  });
+
+  /* Paso 3: multiplicación con cancelaciones */
+  const cantidad = num(ej.valor) + ' ' +
+    fracHTML('<s>' + ej.parO[0] + '</s>', '<s>' + ej.parO[1] + '</s>');
+
+  let exprMult = cantidad;
+  ej.convs.forEach(c => {
+    const nN = num(c.f.num.coef), nD = num(c.f.den.coef);
+    exprMult += ' × ' + fracHTML(nN + ' ' + c.f.num.unit, nD + ' <s>' + c.f.den.unit + '</s>');
+  });
+
+  /* Paso 4: operación numérica */
+  let numProd = num(ej.valor);
+  let denProd = '1';
+  ej.convs.forEach(c => {
+    numProd += ' × ' + num(c.f.num.coef);
+    if (c.f.den.coef !== 1) denProd += ' × ' + num(c.f.den.coef);
+  });
+  const exprFinal = (denProd === '1')
+    ? numProd
+    : fracHTML(numProd, denProd);
+
+  return '<ol class="pasos">' +
+    '<li><span class="etq">Paso 1 · Relaciones entre las unidades</span>' + rels +
+      '<p class="nota">Cada igualdad nos da una fracción equivalente a 1.</p></li>' +
+
+    '<li><span class="etq">Paso 2 · Construimos las fracciones equivalentes a 1</span>' + fracs + '</li>' +
+
+    '<li><span class="etq">Paso 3 · Multiplicamos la medida por esas fracciones</span>' +
+      '<p class="expr">' + exprMult + '</p></li>' +
+
+    '<li><span class="etq">Paso 4 · Cancelamos las unidades y operamos</span>' +
+      '<p class="expr">' + exprFinal + ' ' + ud + ' = ' + num(ej.resultado) + ' ' + ud + '</p>' +
+      '<p class="resultado">' + num(ej.valor) + ' ' + ej.parO[0] + '/' + ej.parO[1] +
+        ' = <b>' + num(ej.resultado) + ' ' + ud + '</b></p></li>' +
+  '</ol>';
+}
+
+function solucionHTML(ej){
+  return ej.tipo === 'simple' ? solucionSimple(ej) : solucionCompuesta(ej);
+}
+
+/* =========================================================
+   5. COMPROBACIÓN
+   ========================================================= */
+
+function parsear(txt){
+  if (txt === null || txt === undefined) return NaN;
+  const s = String(txt).replace(/\s/g, '').replace(',', '.');
+  return parseFloat(s);
+}
+
+function esCorrecto(usuario, esperado){
+  const v = parsear(usuario);
+  if (isNaN(v)) return false;
+  const tol = Math.max(Math.abs(esperado) * 0.01, 1e-12);
+  return Math.abs(v - esperado) <= tol;
+}
+
+/* =========================================================
+   6. PRÁCTICA PRINCIPAL
+   ========================================================= */
+
+let ejercicioActual = null;
+
+function generarEjercicio(){
+  const tipoFiltro = $('#filtroTipo').value;
+  const magFiltro  = $('#filtroMag').value;
+
+  let lista = magnitudesDisponibles(tipoFiltro);
+  if (magFiltro !== 'todas') lista = lista.filter(m => m.key === magFiltro);
+  if (!lista.length) lista = magnitudesDisponibles('todas');
+
+  const elegido = pick(lista);
+  return elegido.tipo === 'simple'
+    ? generarSimple(elegido.key)
+    : generarCompuesta(elegido.key);
+}
+
+function pintarEjercicio(){
+  ejercicioActual = generarEjercicio();
+
+  $('#enunciado').innerHTML = enunciadoHTML(ejercicioActual);
+  $('#unidadDestino').textContent = unidadDestino(ejercicioActual);
+  $('#respuesta').value = '';
+  $('#feedback').innerHTML = '';
+  $('#solucion').innerHTML = solucionHTML(ejercicioActual);
+
+  const acc = $('#acordeon');
+  acc.open = false;
+}
+
+function comprobarPrincipal(){
+  if (!ejercicioActual) return;
+  const txt = $('#respuesta').value;
+  const fb = $('#feedback');
+
+  if (txt.trim() === ''){
+    fb.innerHTML = '<div class="fb bad">Escribe un resultado antes de comprobar.</div>';
+    return;
+  }
+  const v = parsear(txt);
+  if (isNaN(v)){
+    fb.innerHTML = '<div class="fb bad">No he podido leer ese número. Prueba con algo como <b>20</b> o <b>0,025</b>.</div>';
+    return;
+  }
+
+  if (esCorrecto(txt, ejercicioActual.resultado)){
+    fb.innerHTML = '<div class="fb ok">✅ ¡Correcto! ' + num(ejercicioActual.valor) + ' ' +
+      (ejercicioActual.tipo === 'simple' ? ejercicioActual.origen
+        : ejercicioActual.parO[0] + '/' + ejercicioActual.parO[1]) +
+      ' = <b>' + num(ejercicioActual.resultado) + ' ' + unidadDestino(ejercicioActual) + '</b>.</div>';
+  } else {
+    fb.innerHTML = '<div class="fb bad">❌ Todavía no. Revisa los pasos en el desplegable de abajo o prueba otra vez. ' +
+      'Pista: fíjate bien en qué unidad va arriba y cuál abajo en cada fracción.</div>';
+  }
+}
+
+/* =========================================================
+   7. BATERÍA ALEATORIA
+   ========================================================= */
+
+let bateriaActual = [];
+
+function nuevaBateria(n){
+  bateriaActual = [];
+  for (let i = 0; i < n; i++){
+    /* Mezcla: mitad simples, mitad compuestas aprox. */
+    const quiereSimple = Math.random() < 0.55;
+    bateriaActual.push(quiereSimple
+      ? generarSimple(pick(Object.keys(MAGNITUDES)))
+      : generarCompuesta(pick(Object.keys(COMPUESTAS))));
+  }
+  pintarBateria();
+}
+
+function pintarBateria(){
+  const cont = $('#bateria');
+  cont.innerHTML = '';
+
+  bateriaActual.forEach((ej, i) => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML =
+      '<div class="item-head">' +
+        '<div class="num">' + (i + 1) + '</div>' +
+        '<div class="enun">' + enunciadoHTML(ej) + '</div>' +
+      '</div>' +
+      '<div class="item-body">' +
+        '<input type="text" data-idx="' + i + '" placeholder="Resultado" inputmode="decimal" autocomplete="off">' +
+        '<span class="ud">' + unidadDestino(ej) + '</span>' +
+        '<button class="btn-mini" data-check="' + i + '">Comprobar</button>' +
+      '</div>' +
+      '<div class="fb-mini" data-fb="' + i + '" style="display:none"></div>' +
+      '<details class="acc-mini">' +
+        '<summary>💡 Ver solución paso a paso</summary>' +
+        '<div class="cuerpo">' + solucionHTML(ej) + '</div>' +
+      '</details>';
+    cont.appendChild(div);
+  });
+}
+
+function comprobarBateria(i){
+  const ej = bateriaActual[i];
+  const input = document.querySelector('#bateria input[data-idx="' + i + '"]');
+  const fb = document.querySelector('#bateria [data-fb="' + i + '"]');
+  const txt = input.value;
+
+  fb.style.display = 'block';
+
+  if (txt.trim() === '' || isNaN(parsear(txt))){
+    fb.className = 'fb-mini bad';
+    fb.innerHTML = 'Escribe un número válido.';
+    return;
+  }
+
+  if (esCorrecto(txt, ej.resultado)){
+    fb.className = 'fb-mini ok';
+    fb.innerHTML = '✅ ¡Correcto! El resultado es <b>' + num(ej.resultado) + ' ' + unidadDestino(ej) + '</b>.';
+  } else {
+    fb.className = 'fb-mini bad';
+    fb.innerHTML = '❌ No es correcto. Abre la solución para ver dónde está el fallo.';
+  }
+}
+
+/* =========================================================
+   8. FILTROS
+   ========================================================= */
+
+function actualizarFiltroMagnitud(){
+  const tipo = $('#filtroTipo').value;
+  const sel = $('#filtroMag');
+  const anterior = sel.value;
+
+  const lista = magnitudesDisponibles(tipo);
+  let html = '<option value="todas">Todas</option>';
+  lista.forEach(m => {
+    html += '<option value="' + m.key + '">' + nombreMagnitud(m) + '</option>';
+  });
+  sel.innerHTML = html;
+
+  /* Intentar conservar la selección previa si sigue existiendo */
+  if ([...sel.options].some(o => o.value === anterior)) sel.value = anterior;
+}
+
+/* =========================================================
+   9. ARRANQUE
+   ========================================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+  actualizarFiltroMagnitud();
+
+  $('#filtroTipo').addEventListener('change', () => {
+    actualizarFiltroMagnitud();
+    pintarEjercicio();
+  });
+  $('#filtroMag').addEventListener('change', pintarEjercicio);
+
+  $('#btnComprobar').addEventListener('click', comprobarPrincipal);
+  $('#btnNuevo').addEventListener('click', pintarEjercicio);
+
+  $('#respuesta').addEventListener('keydown', e => {
+    if (e.key === 'Enter') comprobarPrincipal();
+  });
+
+  $('#btnBateria').addEventListener('click', () => nuevaBateria(8));
+
+  /* Delegación para los botones de la batería */
+  $('#bateria').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-check]');
+    if (!btn) return;
+    comprobarBateria(Number(btn.dataset.check));
+  });
+
+  $('#bateria').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const input = e.target.closest('input[data-idx]');
+    if (!input) return;
+    comprobarBateria(Number(input.dataset.idx));
+  });
+
+  /* Arranque */
+  pintarEjercicio();
+  nuevaBateria(8);
+});
+</script>
+
+<script>
+/* =========================================================
+   10. PWA · Registro del service worker y chip de versión
+   ---------------------------------------------------------
+   La versión NO está escrita en esta página: se pregunta al
+   service worker por postMessage y él responde con su
+   constante VERSION. Así la página y la caché muestran
+   siempre exactamente la misma versión.
+   ========================================================= */
+(function () {
+  'use strict';
+  if (!('serviceWorker' in navigator)) return;
+
+  const chip = document.getElementById('chipVersion');
+  if (chip) chip.hidden = false; /* se ve "…" mientras llega la respuesta */
+
+  function pintarVersion(v){
+    if (chip && v){
+      chip.textContent = 'v' + v;
+      chip.hidden = false;
+    }
+  }
+
+  function pedirVersion(sw){
+    const destino = sw || navigator.serviceWorker.controller;
+    if (destino) destino.postMessage({ type: 'GET_VERSION' });
+  }
+
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    const datos = e.data || {};
+    if (datos.type === 'VERSION') pintarVersion(datos.version);
+  });
+
+  /* Cuando un SW toma el control (1.ª visita o actualización), volvemos a preguntar */
+  navigator.serviceWorker.addEventListener('controllerchange', () => pedirVersion());
+
+  navigator.serviceWorker.register('./sw.js') /* ruta relativa → scope de la subcarpeta */
+    .then(() => navigator.serviceWorker.ready)
+    .then((reg) => { if (reg.active) pedirVersion(reg.active); })
+    .catch(() => { if (chip) chip.hidden = true; });
+
+  if (navigator.serviceWorker.controller) pedirVersion();
+})();
+</script>
+</body>
+</html>
